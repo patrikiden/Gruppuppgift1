@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/Pallinder/go-randomdata"
 	"github.com/gin-gonic/gin"
 	"systementor.se/yagolangapi/data"
 )
@@ -24,6 +23,29 @@ func start(c *gin.Context) {
 
 // HTML
 // JSON
+/*
+func patrik(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"name": "Patrik Iden", "city": "Stockholm"})
+}
+*/
+func userName(c *gin.Context) {
+	name := c.Param("name")
+	switch name {
+	case "patrik":
+		c.JSON(http.StatusOK, gin.H{
+			"name": "Patrik Iden",
+			"city": "Stockholm",
+		})
+	case "stefan":
+		c.JSON(http.StatusOK, gin.H{
+			"name": "Stefan Holmberg",
+			"city": "Stockholm",
+		})
+		// Add more name alternatives here!
+	default:
+		c.String(http.StatusNotFound, "Error! Could not found name: %s", name)
+	}
+}
 
 func employeesJson(c *gin.Context) {
 	var employees []data.Employee
@@ -60,11 +82,18 @@ func main() {
 		config.Database.Port)
 
 	router := gin.Default()
+
 	router.LoadHTMLGlob("templates/**")
 	router.GET("/", start)
-	router.GET("/api/employees", employeesJson)
-	router.GET("/api/addemployee", addEmployee)
-	router.GET("/api/addmanyemployees", addManyEmployees)
+
+	api := router.Group("/api")
+	api.GET("/employees", employeesJson)
+	api.GET("/addemployee", addEmployee)
+	api.GET("/addmanyemployees", addManyEmployees)
+	// api.GET("/patrik", patrik)
+	api.GET("/test", func(c *gin.Context) { c.String(http.StatusOK, "Hej") })
+	api.GET("/:name", userName)
+
 	router.Run(":8080")
 
 	// e := data.Employee{
